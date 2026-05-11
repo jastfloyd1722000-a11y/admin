@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>安心职场 · 交互MVP演示</title>
+  <style>
+    :root{--bg:#f5f7ff;--card:#fff;--pri:#5b6cff;--ok:#22c55e;--warn:#f59e0b;--txt:#1f2a44;--muted:#7b87a8}
+    *{box-sizing:border-box} body{margin:0;font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;background:linear-gradient(180deg,#eef2ff,#f8fbff);color:var(--txt)}
+    .app{max-width:1100px;margin:24px auto;padding:0 16px}
+    .top{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:12px}
+    .top h1{font-size:24px;margin:0}
+    .badge{background:#e0e7ff;color:#3730a3;padding:6px 10px;border-radius:999px;font-size:12px}
+    .progress{background:#e6ebff;border-radius:999px;height:10px;overflow:hidden;margin:12px 0 20px}
+    .bar{height:100%;width:0;background:linear-gradient(90deg,#5b6cff,#7c3aed);transition:.3s}
+    .steps{display:grid;grid-template-columns:repeat(5,1fr);gap:12px}
+    .step{background:var(--card);border:1px solid #e6eaff;border-radius:14px;padding:14px;min-height:360px;display:none;box-shadow:0 8px 24px rgba(72,87,139,.08)}
+    .step.active{display:block;grid-column:1/-1}
+    .q{margin:10px 0}
+    .chips{display:flex;gap:8px;flex-wrap:wrap}
+    .chip{padding:8px 12px;border:1px solid #d8defe;border-radius:999px;cursor:pointer;background:#fff}
+    .chip.on{background:#eef2ff;border-color:#818cf8;color:#3730a3}
+    .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px}
+    .card{border:1px solid #dce3ff;border-radius:12px;padding:10px;cursor:pointer}
+    .card.on{border-color:#5b6cff;background:#eef2ff}
+    .task{display:flex;justify-content:space-between;align-items:center;padding:10px;border:1px solid #e2e8ff;border-radius:10px;margin:8px 0}
+    button{background:var(--pri);color:#fff;border:none;padding:10px 14px;border-radius:10px;cursor:pointer}
+    .ghost{background:#fff;color:var(--pri);border:1px solid #c7d2fe}
+    .nav{display:flex;justify-content:space-between;margin-top:12px}
+    .kpi{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:12px}
+    .kpi>div{background:#fff;border:1px solid #e5e7eb;border-radius:10px;padding:10px;text-align:center}
+    canvas{max-width:100%;background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:8px}
+  </style>
+</head>
+<body>
+<div class="app">
+  <div class="top"><h1>安心职场｜整体交互效果（MVP）</h1><span class="badge">探索 → 规划 → 行动 → 复盘</span></div>
+  <div class="progress"><div class="bar" id="bar"></div></div>
+
+  <section class="step active" data-step="1">
+    <h2>① 探索问题（5问诊断）</h2>
+    <div id="questions"></div>
+  </section>
+
+  <section class="step" data-step="2">
+    <h2>② 明确目标</h2>
+    <div class="grid" id="goals"></div>
+  </section>
+
+  <section class="step" data-step="3">
+    <h2>③ 制定路径（规则匹配）</h2>
+    <p id="profile"></p>
+    <div id="path" class="grid"></div>
+  </section>
+
+  <section class="step" data-step="4">
+    <h2>④ 执行任务（打卡成长）</h2>
+    <div id="tasks"></div>
+    <div class="kpi">
+      <div><div>等级</div><strong id="level">Lv.1</strong></div>
+      <div><div>经验值</div><strong id="xp">0</strong></div>
+      <div><div>徽章</div><strong id="medal">0</strong></div>
+      <div><div>完成率</div><strong id="rate">0%</strong></div>
+    </div>
+  </section>
+
+  <section class="step" data-step="5">
+    <h2>⑤ 复盘与进化</h2>
+    <canvas id="radar" width="800" height="360"></canvas>
+    <p id="next"></p>
+  </section>
+
+  <div class="nav">
+    <button class="ghost" id="prev">上一步</button>
+    <button id="nextBtn">下一步</button>
+  </div>
+</div>
+<script>
+const qs=["最近你的主要困扰是?","当前情绪状态?","生活精力情况?","关键能力短板?","你最在意什么?"];
+const options=[["工作压力","方向迷茫","关系冲突"],["焦虑","平稳","疲惫"],["不足","一般","充沛"],["表达","执行","影响力"],["成长","稳定","收入"]];
+const goalList=["成为专业深耕者","转管理岗","平衡生活与工作","提升收入"];
+const pathMap={"工作压力":"情绪调节+任务减负","方向迷茫":"职业探索+能力试错","关系冲突":"沟通练习+边界建立"};
+let step=1,answers=[],goal="",tasks=[],done=0,xp=0;
+const qWrap=document.getElementById('questions');
+qs.forEach((q,i)=>{const d=document.createElement('div');d.className='q';d.innerHTML=`<p>${i+1}. ${q}</p><div class='chips'>${options[i].map(o=>`<span class='chip' data-q='${i}' data-v='${o}'>${o}</span>`).join('')}</div>`;qWrap.appendChild(d)});
+document.addEventListener('click',e=>{if(e.target.classList.contains('chip')){const q=e.target.dataset.q;document.querySelectorAll(`.chip[data-q='${q}']`).forEach(c=>c.classList.remove('on'));e.target.classList.add('on');answers[q]=e.target.dataset.v}});
+const gWrap=document.getElementById('goals');goalList.forEach(g=>{const c=document.createElement('div');c.className='card';c.textContent=g;c.onclick=()=>{document.querySelectorAll('#goals .card').forEach(x=>x.classList.remove('on'));c.classList.add('on');goal=g};gWrap.appendChild(c)});
+function genPath(){const key=answers[0]||"方向迷茫";document.getElementById('profile').textContent=`画像：${key} / 目标：${goal||'未选择'}。推荐路径：${pathMap[key]}`;const p=document.getElementById('path');p.innerHTML='';["每日学习15分钟","每周1次实践任务","每周1次复盘记录"].forEach(t=>{const c=document.createElement('div');c.className='card';c.textContent=t;p.appendChild(c)});tasks=["学习微课","完成实践练习","记录3条复盘"]}
+function renderTasks(){const box=document.getElementById('tasks');box.innerHTML='';tasks.forEach((t,i)=>{const row=document.createElement('div');row.className='task';row.innerHTML=`<span>${t}</span><button ${row.done?'disabled':''}>完成 +20XP</button>`;row.querySelector('button').onclick=()=>{if(!row.dataset.done){row.dataset.done='1';done++;xp+=20;updateKpi();row.querySelector('button').textContent='已完成';row.querySelector('button').style.background='#22c55e'}};box.appendChild(row)});}
+function updateKpi(){document.getElementById('xp').textContent=xp;document.getElementById('level').textContent='Lv.'+(1+Math.floor(xp/60));document.getElementById('medal').textContent=Math.floor(done/2);document.getElementById('rate').textContent=Math.round((done/(tasks.length||1))*100)+'%'}
+function drawRadar(){const c=document.getElementById('radar'),ctx=c.getContext('2d');ctx.clearRect(0,0,c.width,c.height);const labels=['情绪','执行','专注','影响力','人际'];const vals=[60+done*8,50+done*12,45+done*10,40+done*6,55+done*7];const cx=380,cy=180,r=130,n=labels.length;for(let k=1;k<=5;k++){ctx.beginPath();for(let i=0;i<n;i++){const a=-Math.PI/2+i*2*Math.PI/n,x=cx+Math.cos(a)*r*k/5,y=cy+Math.sin(a)*r*k/5;i?ctx.lineTo(x,y):ctx.moveTo(x,y)}ctx.closePath();ctx.strokeStyle='#d6dcff';ctx.stroke()}ctx.beginPath();for(let i=0;i<n;i++){const a=-Math.PI/2+i*2*Math.PI/n,x=cx+Math.cos(a)*r*vals[i]/100,y=cy+Math.sin(a)*r*vals[i]/100;i?ctx.lineTo(x,y):ctx.moveTo(x,y);ctx.fillStyle='#4f46e5';ctx.fillText(labels[i],cx+Math.cos(a)*(r+24),cy+Math.sin(a)*(r+24));}ctx.closePath();ctx.fillStyle='rgba(99,102,241,.35)';ctx.fill();ctx.strokeStyle='#4338ca';ctx.stroke();document.getElementById('next').textContent='建议：保持每日任务节奏，下一周期增加1项社交型任务。'}
+function show(s){document.querySelectorAll('.step').forEach(x=>x.classList.remove('active'));document.querySelector(`.step[data-step='${s}']`).classList.add('active');document.getElementById('bar').style.width=(s-1)/4*100+'%';if(s===3)genPath();if(s===4){renderTasks();updateKpi()}if(s===5)drawRadar();}
+document.getElementById('nextBtn').onclick=()=>{if(step<5)step++;show(step)};document.getElementById('prev').onclick=()=>{if(step>1)step--;show(step)};
+</script>
+</body>
+</html>
