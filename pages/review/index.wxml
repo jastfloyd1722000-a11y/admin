@@ -1,0 +1,18 @@
+<view class="container">
+  <view class="title">成长复盘</view>
+  <view class="card">
+    <view>本周期完成任务：{{completed}} / {{total}}</view>
+    <view>经验值：{{xp}}，当前等级：Lv.{{level}}</view>
+    <view>徽章：{{medals}}</view>
+  </view>
+  <view class="card">
+    <view>能力雷达（简化文本）</view>
+    <view>情绪：{{radar.emotion}}</view>
+    <view>执行：{{radar.execute}}</view>
+    <view>专注：{{radar.focus}}</view>
+    <view>影响力：{{radar.influence}}</view>
+    <view>人际：{{radar.social}}</view>
+  </view>
+  <view class="card">下一周期建议：{{advice}}</view>
+  <view class="btn secondary" bindtap="restart">重新开始诊断</view>
+</view>

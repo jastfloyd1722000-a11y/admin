@@ -1,0 +1,13 @@
+<view class="container">
+  <view class="title">5问诊断</view>
+  <view class="sub">先识别当前状态，生成问题画像</view>
+  <block wx:for="{{questions}}" wx:key="index">
+    <view class="card">
+      <view>{{index + 1}}. {{item.title}}</view>
+      <view class="chips" style="margin-top:12rpx;">
+        <text wx:for="{{item.options}}" wx:key="*this" class="chip {{answers[index]===item? 'on':''}}" bindtap="select" data-qidx="{{index}}" data-value="{{item}}">{{item}}</text>
+      </view>
+    </view>
+  </block>
+  <view class="btn" bindtap="next">生成画像并去规划</view>
+</view>

@@ -1,0 +1,17 @@
+<view class="container">
+  <view class="title">执行任务</view>
+  <view class="sub">完成任务获取经验值与成长反馈</view>
+  <view wx:for="{{tasks}}" wx:key="id" class="card">
+    <view style="display:flex;justify-content:space-between;align-items:center;">
+      <text>{{item.title}}</text>
+      <button size="mini" type="primary" disabled="{{item.done}}" data-id="{{item.id}}" bindtap="done">{{item.done?'已完成':'完成 +'+item.xp+'XP'}}</button>
+    </view>
+  </view>
+  <view class="kpi">
+    <view class="card">等级：Lv.{{level}}</view>
+    <view class="card">经验值：{{xp}}</view>
+    <view class="card">徽章：{{medals}}</view>
+    <view class="card">完成率：{{rate}}%</view>
+  </view>
+  <view class="btn" bindtap="next">去复盘</view>
+</view>
