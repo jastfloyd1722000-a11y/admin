@@ -1,0 +1,12 @@
+<view class="container">
+  <view class="title">明确目标</view>
+  <view class="grid">
+    <view wx:for="{{goals}}" wx:key="*this" class="card {{goal===item?'on':''}}" bindtap="pick" data-goal="{{item}}">{{item}}</view>
+  </view>
+  <view class="card">
+    <view>问题画像：{{profile}}</view>
+    <view style="margin-top:12rpx;">推荐路径任务：</view>
+    <view wx:for="{{pathTasks}}" wx:key="*this" style="margin-top:8rpx;">• {{item}}</view>
+  </view>
+  <view class="btn" bindtap="next">去执行任务</view>
+</view>
